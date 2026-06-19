@@ -1,29 +1,33 @@
 import streamlit as st
+import pandas as pd
 from recommender import get_recommendations
 
-st.set_page_config(
-    page_title="Movie Recommendation System",
-    page_icon="🎬"
-)
+movies = pd.read_csv("movies.csv")
 
 st.title("🎬 Movie Recommendation System")
 
-st.write("Enter a movie name and get similar recommendations.")
+option = st.radio(
+    "Choose Recommendation Type",
+    ["By Movie Name", "By Genre"]
+)
 
-movie_name = st.text_input("Movie Name")
+if option == "By Movie Name":
+    movie_name = st.text_input("Enter Movie Name")
 
-if st.button("Recommend"):
-
-    if movie_name.strip() == "":
-        st.warning("Please enter a movie name.")
-    else:
-
+    if st.button("Recommend"):
         result = get_recommendations(movie_name)
 
         if result is None:
             st.error("Movie not found!")
         else:
-            st.subheader("Recommended Movies")
+            st.write(result)
 
-            for movie in result:
-                st.write("✅", movie) 
+else:
+    genres = movies["genre"].unique()
+    selected_genre = st.selectbox("Select Genre", genres)
+
+    if st.button("Show Movies"):
+        result = movies[movies["genre"] == selected_genre]
+
+        for _, row in result.iterrows():
+            st.write(f"🎥 {row['title']} ({row['year']})")
